@@ -64,6 +64,7 @@ for prompt in st.session_state.prompts:
         with st.chat_message(name="CoCreaBot", avatar="🤖"):
             st.write(prompt['content'])
 
+
 if not st.session_state.new_message and 'context' in st.session_state:
     user_message = st.chat_input("Say something")
     if user_message:
@@ -72,12 +73,13 @@ if not st.session_state.new_message and 'context' in st.session_state:
                         Task 2: answer the user's question based on the info you just ingested. This is the question: {user_message}
                         '''
         st.session_state.new_message = True
-        st.session_state.prompts.append({"role": "Human", "content": user_message, "defaultprompt": prompt_cocrea})
+        st.session_state.prompts = [{"role": "Human", "content": user_message, "defaultprompt": prompt_cocrea}]  # Resetting prompts
         with st.spinner(text='Pensando...'):
             response_from_claude = send_message(st.session_state.prompts)
             st.session_state.prompts.append({"role": "Assistant", "content": response_from_claude, "defaultprompt": prompt_cocrea})
             st.session_state.new_message = False
             st.experimental_rerun()
+
 
 if st.button('Restart'):
     st.session_state.prompts = []
