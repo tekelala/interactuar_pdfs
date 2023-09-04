@@ -9,7 +9,6 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain_experimental.llms.anthropic_functions import AnthropicFunctions
 from io import BytesIO
 from pdfminer.high_level import extract_text
 
