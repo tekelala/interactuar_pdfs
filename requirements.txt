@@ -1,3 +1,4 @@
 pdfminer.six
 streamlit
 requests
+langchain
