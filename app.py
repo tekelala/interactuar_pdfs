@@ -29,7 +29,6 @@ def send_message(prompts):
         "stop_sequences": ["\n\nHuman:"]
     }
 
-    # Error handling has been retained from the original code
     try:
         response = requests.post(api_url, headers=headers, data=json.dumps(body))
         response.raise_for_status()
@@ -40,15 +39,18 @@ def send_message(prompts):
     return result['completion'].strip()
 
 
-st.title("Interactua con tu PDF")
+st.title("Interactua con tus PDFs")
 st.write("¡No te quedes con la duda!")
 
-uploaded_file = st.file_uploader("Upload a PDF", type=['pdf'])
+uploaded_files = st.file_uploader("Upload PDFs", type=['pdf'], accept_multiple_files=True)
 
-if uploaded_file:
-    with BytesIO(uploaded_file.getvalue()) as f:
-        context = extract_text(f)
-        st.session_state.context = context
+if uploaded_files:
+    context_texts = []
+    for uploaded_file in uploaded_files:
+        with BytesIO(uploaded_file.getvalue()) as f:
+            context = extract_text(f)
+            context_texts.append(context)
+    st.session_state.contexts = context_texts
 
 if "prompts" not in st.session_state:
     st.session_state.prompts = []
@@ -64,12 +66,12 @@ for prompt in st.session_state.prompts:
         with st.chat_message(name="CoCreaBot", avatar="🤖"):
             st.write(prompt['content'])
 
-
-if not st.session_state.new_message and 'context' in st.session_state:
+if not st.session_state.new_message and 'contexts' in st.session_state:
     user_message = st.chat_input("Say something")
     if user_message:
         prompt_cocrea = f'''Perform the following tasks: 
-                        Task 1: read and understand the uploaded document, here is the info: {st.session_state.context}
+                        Task 1: read and understand the uploaded documents. 
+                        Info from documents: {" ".join(st.session_state.contexts)}
                         Task 2: answer the user's question based on the info you just ingested. This is the question: {user_message}
                         '''
         st.session_state.new_message = True
@@ -79,7 +81,6 @@ if not st.session_state.new_message and 'context' in st.session_state:
             st.session_state.prompts.append({"role": "Assistant", "content": response_from_claude, "defaultprompt": prompt_cocrea})
             st.session_state.new_message = False
             st.experimental_rerun()
-
 
 if st.button('Restart'):
     st.session_state.prompts = []
